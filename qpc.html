@@ -87,6 +87,34 @@ button{font-family:var(--sans);border-radius:0;cursor:pointer;
 button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .hint{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
 
+/* ─── declaração ─── */
+.declare{margin-top:38px;border:1px solid var(--ink);padding:18px 20px}
+.declare .pl{margin-bottom:12px}
+.dcheck{display:flex;gap:11px;align-items:flex-start;cursor:pointer}
+.dcheck input{position:absolute;opacity:0;width:0;height:0}
+.dcheck .dot{flex:0 0 auto;width:17px;height:17px;border:1px solid var(--line);
+  background:#fff;margin-top:2px;position:relative}
+.dcheck:hover .dot{border-color:var(--ink)}
+.dcheck input:checked ~ .dot{background:var(--acc);border-color:var(--acc)}
+.dcheck input:checked ~ .dot::after{content:"";position:absolute;left:4px;top:1px;width:6px;height:11px;
+  border:solid var(--ink);border-width:0 2px 2px 0;transform:rotate(42deg)}
+.dcheck input:focus-visible ~ .dot{outline:2px solid var(--acc);outline-offset:2px}
+.dcheck span.t{font-size:13.5px;line-height:1.45}
+.dname{margin-top:15px;padding-top:14px;border-top:1px solid var(--line2)}
+.dname label{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;
+  color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.dname input{font-family:var(--sans);font-size:15px;font-weight:600;color:var(--ink);
+  background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;
+  padding:3px 0;width:100%;max-width:26rem}
+.dname input:focus{outline:none;border-bottom-color:var(--ink)}
+.declare.pending{border-color:var(--acc-deep);background:var(--acc-soft)}
+
+/* ─── bloco de assinatura no resultado ─── */
+.sig{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  margin-top:14px;padding-top:13px;border-top:1px solid var(--line2)}
+.sig .who{font-size:15px;font-weight:600}
+.sig .when{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
 /* ─── resultado ─── */
 #result{display:none;margin-top:40px}
 #result.on{display:block}
@@ -183,6 +211,19 @@ svg.matrix{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
 
   <form id="form"></form>
 
+  <div class="declare" id="declare">
+    <div class="pl">Declaração</div>
+    <label class="dcheck">
+      <input type="checkbox" id="agree">
+      <span class="dot" aria-hidden="true"></span>
+      <span class="t">Declaro que as respostas acima refletem a minha situação financeira e a minha disposição a risco nesta data.</span>
+    </label>
+    <div class="dname">
+      <label for="fullname">Nome completo</label>
+      <input id="fullname" type="text" autocomplete="name" spellcheck="false">
+    </div>
+  </div>
+
   <div class="actions">
     <button type="button" class="btn" id="submit">Ver resultado</button>
     <span class="hint" id="progress"></span>
@@ -210,9 +251,18 @@ svg.matrix{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
 
     <div class="panel" id="matrixHost"></div>
 
+    <div class="panel" id="sigPanel">
+      <div class="pl">Declaração</div>
+      <p class="note">As respostas registradas neste documento refletem a situação financeira e a disposição a risco declaradas pelo cliente na data abaixo.</p>
+      <div class="sig">
+        <div class="who" id="sigName">—</div>
+        <div class="when" id="sigDate">—</div>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="pl">Código de resposta</div>
-      <p class="note">Envie este código ao seu assessor. Ele reconstrói exatamente estas respostas — o código não carrega nenhum valor financeiro.</p>
+      <p class="note">Envie este código e o PDF ao seu assessor <strong>por e-mail</strong> — a mensagem serve como registro da origem e da data. O código identifica quem respondeu e quando, e não carrega nenhum valor financeiro.</p>
       <div class="tokenrow">
         <div class="token" id="token">—</div>
         <button type="button" class="btn ghost" id="copy">Copiar</button>
@@ -229,7 +279,7 @@ svg.matrix{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
   <details class="review">
     <summary>Conferir um código de resposta</summary>
     <div class="rb">
-      <input id="tokenIn" placeholder="QPC2-XXXX-XXXX-XXXX-XXXX-XX" spellcheck="false">
+      <input id="tokenIn" placeholder="QPC3-XXXX-XXXX-…" spellcheck="false">
       <button type="button" class="btn ghost" id="load">Reconstruir</button>
     </div>
     <p class="err" id="reviewErr" hidden></p>
@@ -319,6 +369,9 @@ const CUT = { moderado:0.52, arrojadoCap:0.72, arrojadoWil:0.73 };
 
 const LETTERS = "ABCDEFG";
 const answers = {};           /* chave → índice da opção */
+let reviewMode = false;       /* true quando reconstruído a partir de um código */
+let CLIENT = "";              /* código do cliente, vindo da URL */
+let RESPDATE = "";            /* data da resposta */
 
 /* ══════════ Render ══════════ */
 
@@ -500,18 +553,25 @@ function makeToken(r){
   letters += LETTERS[answers.w9] + LETTERS[answers.w10] + LETTERS[answers.w11];
   letters += LETTERS[answers["w"+r.route]];
   letters += LETTERS[answers.w13] + LETTERS[answers.w14];
-  const aum = Math.round(r.aum/1000).toString(36).toUpperCase().padStart(4,"0");
-  const body = letters + aum;
-  const raw = body + checksum(body);
-  return "QPC2-" + (raw.match(/.{1,4}/g)||[]).join("-");
+  const aum  = Math.round(r.aum/1000).toString(36).toUpperCase().padStart(4,"0");
+  const dias = Math.floor((Date.now() - Date.UTC(2020,0,1))/86400000).toString(36).toUpperCase().padStart(3,"0");
+  const cli  = (CLIENT||"").toUpperCase().replace(/[^0-9A-Z]/g,"").slice(0,10);
+  const body = letters + aum + dias + cli.length.toString(36).toUpperCase() + cli;
+  const raw  = body + checksum(body);
+  return "QPC3-" + (raw.match(/.{1,4}/g)||[]).join("-");
 }
 
 function readToken(tok){
-  const clean = tok.trim().toUpperCase().replace(/^QPC2-?/,"").replace(/[^0-9A-Z]/g,"");
-  if(clean.length !== 20) throw new Error("Código deve ter 20 caracteres — confira se foi copiado por inteiro.");
+  const clean = tok.trim().toUpperCase().replace(/^QPC3-?/,"").replace(/[^0-9A-Z]/g,"");
+  if(clean.length < 24) throw new Error("Código curto demais — confira se foi copiado por inteiro.");
+  const len = parseInt(clean[21],36);
+  if(isNaN(len) || 22+len+2 !== clean.length)
+    throw new Error("Código com tamanho inesperado — confira se foi copiado por inteiro.");
   const body = clean.slice(0,-2), check = clean.slice(-2);
   if(checksum(body)!==check) throw new Error("Código inválido — há erro de digitação ou falta um trecho.");
-  const letters = body.slice(0,14), aumRaw = body.slice(14);
+
+  const letters = body.slice(0,14), aumRaw = body.slice(14,18);
+  const dias = parseInt(body.slice(18,21),36), cli = body.slice(22,22+len);
 
   const idx = [...letters].map(ch=>LETTERS.indexOf(ch));
   if(idx.some(i=>i<0)) throw new Error("Código com caractere inesperado.");
@@ -521,6 +581,11 @@ function readToken(tok){
   answers[answers.w11===0 ? "w12a" : "w12b"] = idx[11];
   answers.w13 = idx[12]; answers.w14 = idx[13];
 
+  reviewMode = true;
+  const d = new Date(Date.UTC(2020,0,1) + dias*86400000);
+  RESPDATE = d.toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric",timeZone:"UTC"});
+  document.getElementById("today").textContent = RESPDATE;
+  document.getElementById("clientCode").textContent = cli || "—";
   document.getElementById("aum").value = fmt(parseInt(aumRaw,36)*1000);
   document.querySelectorAll("#form input[type=radio]").forEach(el=>{
     el.checked = answers[el.dataset.key] === +el.value;
@@ -548,6 +613,20 @@ function answerList(r){
 }
 
 function show(){
+  if(!reviewMode){
+    const nome = document.getElementById("fullname").value.trim();
+    const ok = document.getElementById("agree").checked;
+    if(!ok || !nome){
+      const d = document.getElementById("declare");
+      d.classList.add("pending");
+      d.scrollIntoView({behavior:"smooth",block:"center"});
+      document.getElementById("progress").textContent =
+        !ok ? "Marque a declaração para continuar." : "Informe o seu nome completo.";
+      (!ok ? document.getElementById("agree") : document.getElementById("fullname")).focus();
+      return;
+    }
+    document.getElementById("declare").classList.remove("pending");
+  }
   if(!parseAum()){
     document.getElementById("progress").textContent = "Informe o valor sob gestão para continuar.";
     document.getElementById("aum").focus();
@@ -571,6 +650,10 @@ function show(){
   document.getElementById("wilRaw").textContent = `${r.wilRaw} de ${r.wilMax}`;
   document.getElementById("matrixHost").innerHTML =
     matrixSVG(r.capPct, r.wilPct).replace("{profile}", r.profile);
+  document.getElementById("sigName").textContent =
+    reviewMode ? "conferido por código" : document.getElementById("fullname").value.trim();
+  document.getElementById("sigDate").textContent =
+    RESPDATE || document.getElementById("today").textContent;
   document.getElementById("token").textContent = makeToken(r);
   document.getElementById("answerList").innerHTML = answerList(r);
   document.getElementById("result").classList.add("on");
@@ -581,10 +664,11 @@ function show(){
 
 const params = new URLSearchParams(location.search);
 if(params.get("v")) document.getElementById("aum").value = fmt(parseInt(params.get("v"),10)||0);
-document.getElementById("clientCode").textContent = params.get("c") || "—";
+CLIENT = params.get("c") || "";
+document.getElementById("clientCode").textContent = CLIENT || "—";
 document.getElementById("year").textContent = new Date().getFullYear();
-document.getElementById("today").textContent =
-  new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"});
+RESPDATE = new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"});
+document.getElementById("today").textContent = RESPDATE;
 
 render();
 
