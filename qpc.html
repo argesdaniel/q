@@ -31,12 +31,12 @@ header.top{background:var(--ink);color:#fff;padding:14px 24px}
   color:var(--acc);text-transform:uppercase}
 h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:3px;color:#fff;line-height:1.15}
 .sub{font-family:var(--mono);font-size:10px;color:#8E8E88;margin-top:4px}
-.notice{font-family:var(--mono);font-size:9px;line-height:1.55;color:#6E6E68;
-  margin-top:11px;padding-top:10px;border-top:1px solid #2A2A27;max-width:82ch}
+.notice{font-family:var(--mono);font-size:9px;line-height:1.55;color:#7A7A75;
+  margin-top:12px;padding-top:10px;border-top:1px solid #33332F;max-width:82ch}
 
 /* ─── banda de identificação ─── */
-.idband{background:var(--ink2);padding:11px 24px;border-bottom:1px solid #2E2E2B;
-  display:grid;grid-template-columns:repeat(3,minmax(120px,220px));gap:6px 28px}
+.idband{background:var(--ink2);padding:11px 24px 12px;border-bottom:1px solid #2E2E2B}
+.idgrid{display:grid;grid-template-columns:repeat(3,minmax(120px,220px));gap:6px 28px}
 .idband .fl{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:#8E8E88;
   text-transform:uppercase;margin-bottom:4px}
 .idband .fv{font-family:var(--mono);font-size:14px;font-weight:600;color:#fff}
@@ -118,16 +118,17 @@ button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 /* ─── resultado ─── */
 #result{display:none;margin-top:40px}
 #result.on{display:block}
-.verdict{background:var(--ink);color:#fff;padding:20px 24px;display:flex;
+.verdict{background:var(--paper2);color:var(--ink);padding:18px 24px;
+  border:1px solid var(--line);border-left:4px solid var(--acc);display:flex;
   align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .verdict .vl{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
-  color:var(--acc);text-transform:uppercase}
+  color:var(--acc-deep);text-transform:uppercase}
 .verdict .vv{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.05;margin-top:3px}
 .verdict .nums{display:flex;gap:26px}
 .verdict .nb .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;
-  color:#8E8E88;text-transform:uppercase}
-.verdict .nb .v{font-family:var(--mono);font-size:22px;font-weight:700;color:#fff;line-height:1.1}
-.verdict .nb .r{font-family:var(--mono);font-size:9.5px;color:#8E8E88}
+  color:var(--muted);text-transform:uppercase}
+.verdict .nb .v{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--ink);line-height:1.1}
+.verdict .nb .r{font-family:var(--mono);font-size:9.5px;color:var(--muted)}
 
 .panel{border:1px solid var(--line);border-top:0;padding:20px 24px}
 svg.matrix{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
@@ -163,20 +164,32 @@ svg.matrix{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
   header.top,.idband,.brand{padding-left:16px;padding-right:16px}
   .brandmark{height:29px;margin-bottom:13px}
   .body{padding-left:16px;padding-right:16px}
-  .idband{grid-template-columns:1fr 1fr}
+  .idgrid{grid-template-columns:1fr 1fr}
   h1{font-size:19px}
   .verdict{padding:16px}
   .verdict .vv{font-size:24px}
   .panel{padding:16px}
   .q{padding-left:30px}
 }
+@page{size:A4;margin:10mm 12mm 12mm}
 @media print{
   body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  header.top,.idband,.verdict{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .brandmark{height:30px}
-  form,.review,.actions,.tokenrow button{display:none !important}
+  header.top,.idband{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  header.top{padding:11px 18px}
+  .brandmark{height:26px;margin-bottom:9px}
+  h1{font-size:18px}
+  .notice{font-size:7.5px;line-height:1.45;margin-top:8px;padding-top:7px}
+  .idband{padding:8px 18px 9px}
+  .idgrid{grid-template-columns:repeat(3,minmax(100px,200px))}
+  form,#declare,.review,.actions,.tokenrow button{display:none !important}
   #result{display:block !important;margin-top:0}
-  .panel{page-break-inside:avoid}
+  .verdict{padding:12px 18px;break-after:avoid;page-break-after:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .verdict .vv{font-size:24px}
+  .verdict .nb .v{font-size:19px}
+  .panel{padding:12px 18px;break-inside:avoid;page-break-inside:avoid}
+  svg.matrix{max-width:360px}
+  #tokenPanel{break-after:page;page-break-after:always}
+  .alist li{padding:6px 0;font-size:11px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
@@ -189,22 +202,24 @@ svg.matrix{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
   <div class="eyebrow">Análise de perfil do investidor</div>
   <h1>Questionário de Perfil do Cliente</h1>
   <div class="sub">14 perguntas · cerca de 10 minutos · Resolução CVM 30</div>
-  <p class="notice">© <span id="year"></span> Quantum Asset. Documento proprietário, de uso exclusivo do destinatário identificado abaixo. Vedada a reprodução, distribuição ou divulgação, total ou parcial, por qualquer meio, sem autorização prévia e expressa.</p>
 </header>
 
 <div class="idband">
-  <div>
-    <div class="fl">Valor sob gestão · BRL</div>
-    <input id="aum" type="text" inputmode="numeric" placeholder="0" aria-label="Valor sob gestão em reais">
+  <div class="idgrid">
+    <div>
+      <div class="fl">Valor sob gestão · BRL</div>
+      <input id="aum" type="text" inputmode="numeric" placeholder="0" aria-label="Valor sob gestão em reais">
+    </div>
+    <div>
+      <div class="fl">Cliente</div>
+      <div class="fv" id="clientCode">—</div>
+    </div>
+    <div>
+      <div class="fl">Data</div>
+      <div class="fv" id="today">—</div>
+    </div>
   </div>
-  <div>
-    <div class="fl">Cliente</div>
-    <div class="fv" id="clientCode">—</div>
-  </div>
-  <div>
-    <div class="fl">Data</div>
-    <div class="fv" id="today">—</div>
-  </div>
+  <p class="notice">© <span id="year"></span> Quantum Asset. Documento proprietário, de uso exclusivo do destinatário identificado acima. Vedada a reprodução, distribuição ou divulgação, total ou parcial, por qualquer meio, sem autorização prévia e expressa.</p>
 </div>
 
 <div class="body">
@@ -260,7 +275,7 @@ svg.matrix{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="tokenPanel">
       <div class="pl">Código de resposta</div>
       <p class="note">Envie este código e o PDF ao seu assessor <strong>por e-mail</strong> — a mensagem serve como registro da origem e da data. O código identifica quem respondeu e quando, e não carrega nenhum valor financeiro.</p>
       <div class="tokenrow">
