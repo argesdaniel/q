@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Custo da Assessoria</title>
+<meta name="description" content="Simulação de honorários da Quantum Asset Management: investimento anual e mensal, impostos e valor líquido para a assessoria.">
+<meta name="theme-color" content="#0D0D0D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%23BEEA32%22%2F%3E%3Crect%20x%3D%2212%22%20y%3D%2244%22%20width%3D%228%22%20height%3D%228%22%20fill%3D%22%230D0D0D%22%2F%3E%3Crect%20x%3D%2224%22%20y%3D%2232%22%20width%3D%228%22%20height%3D%2220%22%20fill%3D%22%230D0D0D%22%2F%3E%3Crect%20x%3D%2236%22%20y%3D%2220%22%20width%3D%228%22%20height%3D%2232%22%20fill%3D%22%230D0D0D%22%2F%3E%3Crect%20x%3D%2248%22%20y%3D%2212%22%20width%3D%224%22%20height%3D%2240%22%20fill%3D%22%230D0D0D%22%2F%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Identidade da Quantum — mesma do calendário: preto, verde limão, cantos retos */
+  :root{
+    --ink:#0D0D0D; --ink2:#1A1A1A;
+    --paper:#FFFFFF; --paper2:#F7F7F5;
+    --line:#E2E2DF; --line2:#EFEFEC;
+    --text:#0D0D0D; --muted:#7A7A75; --muted2:#9B9B95;
+    --acc:#BEEA32; --acc-soft:#F6FCE2; --acc-deep:#637A1A;
+    --out:#5A5A55;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0}
+  img{max-width:100%}
+  [hidden]{display:none !important}
+  body{
+    background:var(--paper2); color:var(--text);
+    font-family:'Archivo', system-ui, -apple-system, sans-serif;
+    font-size:14px; -webkit-font-smoothing:antialiased;
+  }
+  .sheet{max-width:720px; margin:0 auto; background:var(--paper); min-height:100%}
+
+  /* ---------- cabeçalho ---------- */
+  header.top{background:var(--ink); color:#fff; padding:22px 24px 24px}
+  .eyebrow{
+    font-family:'IBM Plex Mono', ui-monospace, monospace;
+    font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--acc);
+  }
+  h1{
+    font-size:clamp(24px,5.2vw,31px); font-weight:800; letter-spacing:-.025em;
+    line-height:1.12; margin-top:9px; color:#fff; text-wrap:balance;
+  }
+
+  /* ---------- taxas livres de risco ---------- */
+  .taxas{
+    background:var(--paper2); border-bottom:1px solid var(--line);
+    padding:14px 24px 15px;
+    display:flex; align-items:flex-end; gap:22px 28px; flex-wrap:wrap;
+  }
+  .taxas .cap{
+    flex:1 1 100%;
+    font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted2);
+  }
+  .rf{display:flex; flex-direction:column; gap:5px}
+  .rf label{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; font-weight:500;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+  }
+  .rf .campo{display:flex; align-items:baseline; gap:4px; border-bottom:2px solid var(--line)}
+  .rf .campo:focus-within{border-bottom-color:var(--acc)}
+  .rf input{
+    width:4.4em; border:0; background:transparent; padding:0 0 3px;
+    font-family:'Archivo', system-ui, sans-serif; font-size:19px; font-weight:700;
+    letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--ink);
+    text-align:right;
+  }
+  .rf input:focus{outline:none}
+  .rf .pc{font-size:14px; font-weight:600; color:var(--muted2)}
+  .rf.ativa label{color:var(--acc-deep)}
+  .rf.ativa .campo{border-bottom-color:var(--ink)}
+
+  /* ---------- entrada ---------- */
+  .entrada{padding:22px 24px 24px; border-bottom:1px solid var(--line); background:var(--paper)}
+  .entrada-topo{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+  .lbl{
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; font-weight:500;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  }
+  .moedas{display:flex; border:1px solid var(--line)}
+  .moedas button{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600; letter-spacing:.1em;
+    padding:6px 12px; border:0; background:transparent; color:var(--muted); cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .moedas button[aria-pressed="true"]{background:var(--ink); color:#fff}
+  .moedas button:focus-visible{outline:2px solid var(--acc); outline-offset:1px}
+
+  .entrada-linha{display:flex; align-items:baseline; gap:9px; margin-top:13px}
+  .simbolo{
+    font-size:clamp(20px,4vw,24px); font-weight:600; color:var(--muted2);
+    font-variant-numeric:tabular-nums;
+  }
+  #aum{
+    flex:1 1 auto; min-width:0; width:100%;
+    font-family:'Archivo', system-ui, sans-serif;
+    font-size:clamp(30px,6.6vw,40px); font-weight:800; letter-spacing:-.03em;
+    line-height:1.1; font-variant-numeric:tabular-nums;
+    color:var(--ink); background:transparent;
+    border:0; border-bottom:2px solid var(--line); padding:0 0 5px;
+  }
+  #aum:focus{outline:none; border-bottom-color:var(--acc)}
+
+  .faixa{
+    margin-top:14px; display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; line-height:1.45; color:var(--muted);
+  }
+  .faixa .chip{
+    background:var(--ink); color:#fff; font-weight:600; letter-spacing:.04em;
+    padding:4px 10px; font-size:13.5px;
+  }
+
+  /* ---------- anual ---------- */
+  .anual{
+    padding:20px 24px 21px; background:var(--paper2); border-bottom:1px solid var(--line);
+    display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  .anual .txt strong{display:block; font-size:15px; font-weight:700; letter-spacing:-.01em}
+  .anual .txt span{
+    display:block; margin-top:5px; font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; color:var(--muted); letter-spacing:.02em;
+  }
+  .anual .big{
+    font-size:clamp(27px,5.6vw,34px); font-weight:800; letter-spacing:-.03em;
+    font-variant-numeric:tabular-nums; color:var(--ink); white-space:nowrap;
+  }
+
+  /* ---------- mensal ---------- */
+  .mensal{padding:22px 24px 24px}
+  .secao{
+    display:flex; align-items:center; gap:10px; margin-bottom:6px;
+    font-size:17px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink);
+  }
+  .secao::before{content:""; width:5px; height:20px; background:var(--acc); flex:none}
+
+  .row{
+    display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+    padding:15px 0; border-bottom:1px solid var(--line2);
+  }
+  .row .rot{font-size:14px; font-weight:600; line-height:1.3}
+  .row .rot em{
+    display:block; font-style:normal; margin-top:4px;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--muted); letter-spacing:.02em;
+  }
+  .row .num{
+    font-size:clamp(20px,4.2vw,24px); font-weight:700; letter-spacing:-.025em;
+    font-variant-numeric:tabular-nums; white-space:nowrap;
+  }
+  .row.saida .rot, .row.saida .num{color:var(--out)}
+  .row.saida .num::before{content:"\2212 "}
+
+  .row.liquido{
+    border-bottom:0; margin-top:11px; padding:17px 16px 18px;
+    background:var(--acc); align-items:center;
+  }
+  .row.liquido .rot{font-size:15px; font-weight:800; color:var(--ink); letter-spacing:-.01em}
+  .row.liquido .rot em{color:var(--acc-deep); opacity:.9}
+  .row.liquido .num{font-size:clamp(26px,5.4vw,32px); font-weight:800; color:var(--ink)}
+
+  .split{margin-top:15px}
+  .split .bar{display:flex; height:8px; background:var(--line2); overflow:hidden}
+  .split .bar i{display:block; height:100%; transition:width .35s ease}
+  .split .leg{
+    display:flex; justify-content:space-between; gap:12px; margin-top:8px;
+    font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .split .leg b{color:var(--ink); font-weight:600; font-size:13.5px}
+
+  /* ---------- âncora ---------- */
+  .ancora{
+    margin:0 24px 22px; padding:16px 18px;
+    background:var(--acc-soft); border-left:4px solid var(--acc);
+  }
+  .ancora p{font-size:13.5px; line-height:1.62; color:var(--ink2)}
+  .ancora b{
+    font-weight:700; color:var(--acc-deep); font-variant-numeric:tabular-nums; font-size:15px;
+  }
+
+  /* ---------- notas ---------- */
+  .notas{padding:0 24px 24px; display:flex; flex-direction:column; gap:10px}
+  .notas p{font-size:12px; line-height:1.6; color:var(--muted); max-width:64ch}
+  .notas strong{color:var(--ink2); font-weight:700}
+  .notas .mono{font-family:'IBM Plex Mono', monospace; color:var(--ink2)}
+
+  footer{
+    background:var(--ink); color:#8E8E88; padding:13px 24px;
+    font-family:'IBM Plex Mono', monospace; font-size:9.5px;
+    letter-spacing:.16em; text-transform:uppercase;
+  }
+
+  @media (max-width:430px){
+    header.top, .entrada, .anual, .mensal, .notas, footer, .taxas{padding-left:16px; padding-right:16px}
+    .ancora{margin-left:16px; margin-right:16px}
+    .row.liquido{padding-left:13px; padding-right:13px}
+    .secao{font-size:15px}
+    .taxas{gap:16px 22px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <header class="top">
+    <div class="eyebrow">Quantum Asset Management &middot; simulação</div>
+    <h1>Investimento na Assessoria qualificada</h1>
+  </header>
+
+  <section class="taxas">
+    <span class="cap">Taxa livre de risco &middot; referência</span>
+    <div class="rf ativa" id="rf-brl">
+      <label for="selic">Selic &middot; BRL</label>
+      <div class="campo">
+        <input id="selic" inputmode="decimal" autocomplete="off" spellcheck="false" value="13,75">
+        <span class="pc">%</span>
+      </div>
+    </div>
+    <div class="rf" id="rf-usd">
+      <label for="fed">Fed Funds &middot; USD</label>
+      <div class="campo">
+        <input id="fed" inputmode="decimal" autocomplete="off" spellcheck="false" value="5,00">
+        <span class="pc">%</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="entrada">
+    <div class="entrada-topo">
+      <span class="lbl">Valor sob gestão</span>
+      <div class="moedas" role="group" aria-label="Moeda">
+        <button type="button" data-moeda="BRL" aria-pressed="true">BRL</button>
+        <button type="button" data-moeda="USD" aria-pressed="false">USD</button>
+      </div>
+    </div>
+    <div class="entrada-linha">
+      <span class="simbolo" id="simbolo">R$</span>
+      <input id="aum" inputmode="numeric" autocomplete="off" spellcheck="false"
+             aria-label="Valor sob gestão" value="2.000.000">
+    </div>
+    <div class="faixa">
+      <span class="chip" id="taxa">1,00% a.a.</span>
+      <span id="taxa-mes">taxa da sua faixa &middot; cobrada mensalmente a 0,0830%</span>
+    </div>
+  </section>
+
+  <section class="anual">
+    <div class="txt">
+      <strong>Investimento anual na Assessoria</strong>
+      <span id="anual-sub">doze cobranças mensais</span>
+    </div>
+    <div class="big" id="fee-ano">&mdash;</div>
+  </section>
+
+  <section class="mensal">
+    <h2 class="secao">Mês a mês</h2>
+
+    <div class="row">
+      <div class="rot">Você paga
+        <em>taxa de administração</em></div>
+      <div class="num" id="fee-mes">&mdash;</div>
+    </div>
+
+    <div class="row saida">
+      <div class="rot">Impostos
+        <em>alíquota efetiva de 15,2%</em></div>
+      <div class="num" id="imp-mes">&mdash;</div>
+    </div>
+
+    <div class="row liquido">
+      <div class="rot">Valor líquido para a Assessoria
+        <em>depois de impostos</em></div>
+      <div class="num" id="liq-mes">&mdash;</div>
+    </div>
+
+    <div class="split">
+      <div class="bar" aria-hidden="true">
+        <i id="bar-liq" style="width:84.8%;background:#BEEA32"></i>
+        <i id="bar-imp" style="width:15.2%;background:#5A5A55"></i>
+      </div>
+      <div class="leg">
+        <span><b id="leg-liq">84,8%</b> assessoria</span>
+        <span><b id="leg-imp">15,2%</b> imposto</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="ancora">
+    <p>Parado na renda fixa a <b id="rf-taxa">&mdash;</b> ao ano, esse capital renderia cerca de
+      <b id="rf-ano">&mdash;</b>. A assessoria custa <b id="rf-pct">&mdash;</b> desse rendimento
+      &mdash; e <b id="liq-pct">&mdash;</b> é o que de fato fica com a assessoria.</p>
+  </section>
+
+  <section class="notas">
+    <p><strong>A taxa é composta, não dividida.</strong> Doze cobranças mensais de
+      <span class="mono" id="nota-mes">0,0830%</span> equivalem exatamente a
+      <span class="mono" id="nota-ano">1,00%</span> ao ano. Por isso o valor anual é um pouco
+      menor que a taxa cheia aplicada de uma vez.</p>
+    <p><strong>A base é o patrimônio médio do mês</strong>, não o saldo de um dia. A cobrança
+      acompanha o valor real da carteira, para cima e para baixo.</p>
+    <p><strong>A taxa livre de risco é editável</strong> e serve só para dimensionar o custo
+      contra o que o capital renderia sem gestão nenhuma. É taxa bruta, antes de imposto de renda.</p>
+  </section>
+
+  <footer>Simulação &middot; valores sujeitos a confirmação em proposta</footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // Tabela vigente da Quantum. Limite superior EXCLUSIVO. Espelha a `t_fee` das ferramentas.
+  var TABELA = {
+    BRL: [[0,1e6,.0150],[1e6,2e6,.0125],[2e6,3.5e6,.0100],[3.5e6,6e6,.0090],
+          [6e6,1e7,.0085],[1e7,1.5e7,.0075],[1.5e7,2e7,.0070],[2e7,2.5e7,.0065],
+          [2.5e7,3e7,.0060],[3e7,3.5e7,.0055],[3.5e7,4e7,.0050],[4e7,5e7,.0045],
+          [5e7,7.5e7,.0035],[7.5e7,Infinity,.0030]],
+    USD: [[0,1e6,.0075],[1e6,2e6,.0065],[2e6,3.5e6,.0055],[3.5e6,1e7,.0050],
+          [1e7,2e7,.0045],[2e7,3e7,.0040],[3e7,5e7,.0035],[5e7,7.5e7,.0030],
+          [7.5e7,Infinity,.0025]]
+  };
+
+  var IMPOSTO = 0.152;                     // efetivo medido nos pagamentos ao fisco
+  var SIMBOLO = {BRL:"R$", USD:"US$"};
+  var LOCALE  = {BRL:"pt-BR", USD:"en-US"};
+  var CHAVE   = "quantum.custo-assessoria.v1";
+
+  var moeda = "BRL";
+  var $ = function(id){ return document.getElementById(id); };
+
+  function digitos(s){ return String(s).replace(/\D/g,""); }
+  function agrupa(n){ return new Intl.NumberFormat(LOCALE[moeda],{maximumFractionDigits:0}).format(n); }
+  function dinheiro(n){
+    return SIMBOLO[moeda] + " " + new Intl.NumberFormat(LOCALE[moeda],
+      {minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
+  }
+  function pct(x, casas){
+    return new Intl.NumberFormat("pt-BR",
+      {minimumFractionDigits:casas, maximumFractionDigits:casas}).format(x*100) + "%";
+  }
+  // aceita "13,75" e "13.75"; devolve fração (0.1375). Vazio ou inválido -> 0.
+  function taxaLivre(id){
+    var v = parseFloat(String($(id).value).replace(/\s/g,"").replace(",","."));
+    return (isFinite(v) && v >= 0) ? v/100 : 0;
+  }
+  function taxaDe(v){
+    var t = TABELA[moeda];
+    for (var i=0;i<t.length;i++){ if (v>=t[i][0] && v<t[i][1]) return t[i][2]; }
+    return t[t.length-1][2];
+  }
+
+  function guarda(){
+    try{
+      localStorage.setItem(CHAVE, JSON.stringify({
+        selic:$("selic").value, fed:$("fed").value, moeda:moeda
+      }));
+    }catch(e){}
+  }
+  function recupera(){
+    try{
+      var raw = localStorage.getItem(CHAVE);
+      if(!raw) return;
+      var d = JSON.parse(raw) || {};
+      if(d.selic) $("selic").value = d.selic;
+      if(d.fed)   $("fed").value   = d.fed;
+      if(d.moeda === "USD" || d.moeda === "BRL") moeda = d.moeda;
+    }catch(e){}
+  }
+
+  function calcula(){
+    var aum    = Number(digitos($("aum").value)) || 0;
+    var anual  = taxaDe(aum);
+    var mensal = Math.pow(1+anual, 1/12) - 1;   // duodécimo GEOMÉTRICO
+    var feeMes = aum * mensal;
+    var feeAno = feeMes * 12;                    // o que ele paga de fato em doze cobranças
+    var impMes = feeMes * IMPOSTO;
+    var liqMes = feeMes - impMes;
+
+    var rfTaxa = moeda === "BRL" ? taxaLivre("selic") : taxaLivre("fed");
+    var rf     = aum * rfTaxa;
+
+    $("taxa").textContent      = pct(anual,2) + " a.a.";
+    $("taxa-mes").innerHTML    = "taxa da sua faixa &middot; cobrada mensalmente a " + pct(mensal,4);
+    $("nota-mes").textContent  = pct(mensal,4);
+    $("nota-ano").textContent  = pct(anual,2);
+    $("anual-sub").textContent = "doze cobranças mensais de " + pct(mensal,4);
+
+    $("fee-ano").textContent = dinheiro(feeAno);
+    $("fee-mes").textContent = dinheiro(feeMes);
+    $("imp-mes").textContent = dinheiro(impMes);
+    $("liq-mes").textContent = dinheiro(liqMes);
+
+    $("bar-liq").style.width = ((1-IMPOSTO)*100) + "%";
+    $("bar-imp").style.width = (IMPOSTO*100) + "%";
+    $("leg-liq").textContent = pct(1-IMPOSTO,1);
+    $("leg-imp").textContent = pct(IMPOSTO,1);
+
+    $("rf-taxa").textContent = pct(rfTaxa,2);
+    $("rf-ano").textContent  = dinheiro(rf);
+    $("rf-pct").textContent  = rf > 0 ? pct(feeAno/rf,1) : "—";
+    $("liq-pct").textContent = rf > 0 ? pct(feeAno*(1-IMPOSTO)/rf,1) : "—";
+
+    $("rf-brl").classList.toggle("ativa", moeda === "BRL");
+    $("rf-usd").classList.toggle("ativa", moeda === "USD");
+  }
+
+  function formataCampo(){
+    var d = digitos($("aum").value);
+    $("aum").value = d ? agrupa(Number(d)) : "";
+  }
+
+  $("aum").addEventListener("input", function(){
+    var campo = $("aum");
+    var daDireita = campo.value.length - campo.selectionStart;
+    formataCampo();
+    var pos = Math.max(0, campo.value.length - daDireita);
+    try { campo.setSelectionRange(pos,pos); } catch(e){}
+    calcula();
+  });
+
+  ["selic","fed"].forEach(function(id){
+    $(id).addEventListener("input", function(){ calcula(); guarda(); });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".moedas button"), function(b){
+    b.addEventListener("click", function(){
+      moeda = b.dataset.moeda;
+      Array.prototype.forEach.call(document.querySelectorAll(".moedas button"), function(o){
+        o.setAttribute("aria-pressed", String(o === b));
+      });
+      $("simbolo").textContent = SIMBOLO[moeda];
+      formataCampo();
+      calcula();
+      guarda();
+    });
+  });
+
+  recupera();
+  Array.prototype.forEach.call(document.querySelectorAll(".moedas button"), function(o){
+    o.setAttribute("aria-pressed", String(o.dataset.moeda === moeda));
+  });
+  $("simbolo").textContent = SIMBOLO[moeda];
+  formataCampo();
+  calcula();
+})();
+</script>
+
+</body>
+</html>
