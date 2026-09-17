@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Custo da Assessoria</title>
-<meta name="description" content="Simulação de honorários da Quantum Asset Management: investimento anual e mensal, impostos e valor líquido para a assessoria.">
+<meta name="description" content="Simulação de honorários da Quantum Asset Management: carteira em BRL e USD, investimento anual e mensal, impostos e valor líquido para a assessoria.">
 <meta name="theme-color" content="#0D0D0D">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%23BEEA32%22%2F%3E%3Crect%20x%3D%2212%22%20y%3D%2244%22%20width%3D%228%22%20height%3D%228%22%20fill%3D%22%230D0D0D%22%2F%3E%3Crect%20x%3D%2224%22%20y%3D%2232%22%20width%3D%228%22%20height%3D%2220%22%20fill%3D%22%230D0D0D%22%2F%3E%3Crect%20x%3D%2236%22%20y%3D%2220%22%20width%3D%228%22%20height%3D%2232%22%20fill%3D%22%230D0D0D%22%2F%3E%3Crect%20x%3D%2248%22%20y%3D%2212%22%20width%3D%224%22%20height%3D%2240%22%20fill%3D%22%230D0D0D%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +31,7 @@
     font-family:'Archivo', system-ui, -apple-system, sans-serif;
     font-size:14px; -webkit-font-smoothing:antialiased;
   }
-  .sheet{max-width:720px; margin:0 auto; background:var(--paper); min-height:100%}
+  .sheet{max-width:820px; margin:0 auto; background:var(--paper); min-height:100%}
 
   /* ---------- cabeçalho ---------- */
   header.top{background:var(--ink); color:#fff; padding:22px 24px 24px}
@@ -44,102 +44,118 @@
     line-height:1.12; margin-top:9px; color:#fff; text-wrap:balance;
   }
 
-  /* ---------- taxas livres de risco ---------- */
-  .taxas{
+  /* ---------- parâmetros ---------- */
+  .params{
     background:var(--paper2); border-bottom:1px solid var(--line);
-    padding:14px 24px 15px;
-    display:flex; align-items:flex-end; gap:22px 28px; flex-wrap:wrap;
+    padding:14px 24px 16px;
+    display:flex; align-items:flex-end; gap:20px 30px; flex-wrap:wrap;
   }
-  .taxas .cap{
+  .params .cap{
     flex:1 1 100%;
     font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.16em;
     text-transform:uppercase; color:var(--muted2);
   }
-  .rf{display:flex; flex-direction:column; gap:5px}
-  .rf label{
+  .par{display:flex; flex-direction:column; gap:5px}
+  .par label{
     font-family:'IBM Plex Mono', monospace; font-size:11.5px; font-weight:500;
     letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
   }
-  .rf .campo{display:flex; align-items:baseline; gap:4px; border-bottom:2px solid var(--line)}
-  .rf .campo:focus-within{border-bottom-color:var(--acc)}
-  .rf input{
-    width:4.4em; border:0; background:transparent; padding:0 0 3px;
+  .par .campo{display:flex; align-items:baseline; gap:4px; border-bottom:2px solid var(--line)}
+  .par .campo:focus-within{border-bottom-color:var(--acc)}
+  .par input{
+    width:4.6em; border:0; background:transparent; padding:0 0 3px;
     font-family:'Archivo', system-ui, sans-serif; font-size:19px; font-weight:700;
     letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--ink);
     text-align:right;
   }
-  .rf input:focus{outline:none}
-  .rf .pc{font-size:14px; font-weight:600; color:var(--muted2)}
-  .rf.ativa label{color:var(--acc-deep)}
-  .rf.ativa .campo{border-bottom-color:var(--ink)}
+  .par input:focus{outline:none}
+  .par .un{font-size:14px; font-weight:600; color:var(--muted2)}
 
-  /* ---------- entrada ---------- */
-  .entrada{padding:22px 24px 24px; border-bottom:1px solid var(--line); background:var(--paper)}
-  .entrada-topo{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
-  .lbl{
-    font-family:'IBM Plex Mono', monospace; font-size:12.5px; font-weight:500;
-    letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
-  }
-  .moedas{display:flex; border:1px solid var(--line)}
-  .moedas button{
-    font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:600; letter-spacing:.1em;
-    padding:6px 12px; border:0; background:transparent; color:var(--muted); cursor:pointer;
-    transition:background .15s ease, color .15s ease;
-  }
-  .moedas button[aria-pressed="true"]{background:var(--ink); color:#fff}
-  .moedas button:focus-visible{outline:2px solid var(--acc); outline-offset:1px}
+  /* ---------- duas moedas ---------- */
+  .duplo{display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid var(--line)}
+  .coluna{padding:20px 24px 22px}
+  .coluna + .coluna{border-left:1px solid var(--line)}
 
-  .entrada-linha{display:flex; align-items:baseline; gap:9px; margin-top:13px}
-  .simbolo{
-    font-size:clamp(20px,4vw,24px); font-weight:600; color:var(--muted2);
-    font-variant-numeric:tabular-nums;
+  .moeda-tag{
+    display:inline-block; background:var(--ink); color:#fff;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; font-weight:600;
+    letter-spacing:.14em; padding:4px 11px;
   }
-  #aum{
+  .coluna .lbl{
+    display:block; margin-top:14px;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; font-weight:500;
+    letter-spacing:.13em; text-transform:uppercase; color:var(--muted);
+  }
+  .entrada-linha{display:flex; align-items:baseline; gap:8px; margin-top:8px}
+  .simbolo{font-size:20px; font-weight:600; color:var(--muted2); font-variant-numeric:tabular-nums}
+  .aum{
     flex:1 1 auto; min-width:0; width:100%;
     font-family:'Archivo', system-ui, sans-serif;
-    font-size:clamp(30px,6.6vw,40px); font-weight:800; letter-spacing:-.03em;
+    font-size:clamp(26px,4.6vw,32px); font-weight:800; letter-spacing:-.03em;
     line-height:1.1; font-variant-numeric:tabular-nums;
     color:var(--ink); background:transparent;
     border:0; border-bottom:2px solid var(--line); padding:0 0 5px;
   }
-  #aum:focus{outline:none; border-bottom-color:var(--acc)}
+  .aum:focus{outline:none; border-bottom-color:var(--acc)}
 
   .faixa{
-    margin-top:14px; display:flex; align-items:center; gap:9px; flex-wrap:wrap;
-    font-family:'IBM Plex Mono', monospace; font-size:12.5px; line-height:1.45; color:var(--muted);
+    margin-top:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; line-height:1.45; color:var(--muted);
   }
   .faixa .chip{
-    background:var(--ink); color:#fff; font-weight:600; letter-spacing:.04em;
+    background:var(--acc); color:var(--ink); font-weight:700; letter-spacing:.03em;
     padding:4px 10px; font-size:13.5px;
   }
 
-  /* ---------- anual ---------- */
+  .mini{margin-top:16px; border-top:1px solid var(--line2)}
+  .mini .l{
+    display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+    padding:11px 0; border-bottom:1px solid var(--line2);
+  }
+  .mini .l:last-child{border-bottom:0}
+  .mini .l span{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .mini .l b{
+    font-size:17px; font-weight:700; letter-spacing:-.02em;
+    font-variant-numeric:tabular-nums; white-space:nowrap;
+  }
+
+  /* ---------- total ---------- */
+  .total{padding:22px 24px 24px}
+  .secao{
+    display:flex; align-items:center; gap:10px; margin-bottom:3px;
+    font-size:17px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--ink);
+  }
+  .secao::before{content:""; width:5px; height:20px; background:var(--acc); flex:none}
+  .secao-sub{
+    margin:0 0 12px 15px;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--muted2); letter-spacing:.04em;
+  }
+
   .anual{
-    padding:20px 24px 21px; background:var(--paper2); border-bottom:1px solid var(--line);
+    background:var(--paper2); border:1px solid var(--line); padding:16px 18px;
     display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;
   }
-  .anual .txt strong{display:block; font-size:15px; font-weight:700; letter-spacing:-.01em}
-  .anual .txt span{
+  .anual strong{display:block; font-size:15px; font-weight:700; letter-spacing:-.01em}
+  .anual span{
     display:block; margin-top:5px; font-family:'IBM Plex Mono', monospace;
-    font-size:12.5px; color:var(--muted); letter-spacing:.02em;
+    font-size:12px; color:var(--muted); letter-spacing:.02em;
   }
   .anual .big{
-    font-size:clamp(27px,5.6vw,34px); font-weight:800; letter-spacing:-.03em;
+    font-size:clamp(26px,5.2vw,32px); font-weight:800; letter-spacing:-.03em;
     font-variant-numeric:tabular-nums; color:var(--ink); white-space:nowrap;
   }
 
-  /* ---------- mensal ---------- */
-  .mensal{padding:22px 24px 24px}
-  .secao{
-    display:flex; align-items:center; gap:10px; margin-bottom:6px;
-    font-size:17px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
-    color:var(--ink);
+  .mesames{
+    margin-top:6px;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; letter-spacing:.13em;
+    text-transform:uppercase; color:var(--muted); padding-top:16px;
   }
-  .secao::before{content:""; width:5px; height:20px; background:var(--acc); flex:none}
-
   .row{
     display:flex; align-items:baseline; justify-content:space-between; gap:14px;
-    padding:15px 0; border-bottom:1px solid var(--line2);
+    padding:14px 0; border-bottom:1px solid var(--line2);
   }
   .row .rot{font-size:14px; font-weight:600; line-height:1.3}
   .row .rot em{
@@ -171,20 +187,15 @@
   }
   .split .leg b{color:var(--ink); font-weight:600; font-size:13.5px}
 
-  /* ---------- âncora ---------- */
-  .ancora{
-    margin:0 24px 22px; padding:16px 18px;
-    background:var(--acc-soft); border-left:4px solid var(--acc);
-  }
-  .ancora p{font-size:13.5px; line-height:1.62; color:var(--ink2)}
-  .ancora b{
-    font-weight:700; color:var(--acc-deep); font-variant-numeric:tabular-nums; font-size:15px;
-  }
-
   /* ---------- notas ---------- */
-  .notas{padding:0 24px 24px; display:flex; flex-direction:column; gap:10px}
-  .notas p{font-size:12px; line-height:1.6; color:var(--muted); max-width:64ch}
-  .notas strong{color:var(--ink2); font-weight:700}
+  /* três colunas: ocupam toda a largura da diagramação e mantêm a medida legível
+     (~40 caracteres por linha), em vez de uma coluna estreita com metade da folha vazia */
+  .notas{
+    margin:0 24px; padding:18px 0 26px; border-top:1px solid var(--line);
+    display:grid; grid-template-columns:repeat(3,1fr); gap:20px 26px;
+  }
+  .notas p{font-size:12px; line-height:1.62; color:var(--muted)}
+  .notas strong{display:block; color:var(--ink2); font-weight:700; margin-bottom:3px}
   .notas .mono{font-family:'IBM Plex Mono', monospace; color:var(--ink2)}
 
   footer{
@@ -193,12 +204,18 @@
     letter-spacing:.16em; text-transform:uppercase;
   }
 
+  @media (max-width:820px){ .notas{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:620px){
+    .duplo{grid-template-columns:1fr}
+    .coluna + .coluna{border-left:0; border-top:1px solid var(--line)}
+    .notas{grid-template-columns:1fr; gap:14px}
+  }
   @media (max-width:430px){
-    header.top, .entrada, .anual, .mensal, .notas, footer, .taxas{padding-left:16px; padding-right:16px}
-    .ancora{margin-left:16px; margin-right:16px}
+    header.top, .params, .coluna, .total, footer{padding-left:16px; padding-right:16px}
+    .notas{margin-left:16px; margin-right:16px}
     .row.liquido{padding-left:13px; padding-right:13px}
     .secao{font-size:15px}
-    .taxas{gap:16px 22px}
+    .params{gap:16px 22px}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
@@ -209,56 +226,85 @@
 
   <header class="top">
     <div class="eyebrow">Quantum Asset Management &middot; simulação</div>
-    <h1>Investimento na Assessoria qualificada</h1>
+    <h1>Investimento na Assessoria</h1>
   </header>
 
-  <section class="taxas">
-    <span class="cap">Taxa livre de risco &middot; referência</span>
-    <div class="rf ativa" id="rf-brl">
+  <section class="params">
+    <span class="cap">Parâmetros</span>
+    <div class="par">
+      <label for="cambio">USD / BRL</label>
+      <div class="campo">
+        <span class="un">R$</span>
+        <input id="cambio" inputmode="decimal" autocomplete="off" spellcheck="false" value="5,1500">
+      </div>
+    </div>
+    <div class="par">
       <label for="selic">Selic &middot; BRL</label>
       <div class="campo">
-        <input id="selic" inputmode="decimal" autocomplete="off" spellcheck="false" value="13,75">
-        <span class="pc">%</span>
+        <input id="selic" inputmode="decimal" autocomplete="off" spellcheck="false" value="13,25">
+        <span class="un">%</span>
       </div>
     </div>
-    <div class="rf" id="rf-usd">
+    <div class="par">
       <label for="fed">Fed Funds &middot; USD</label>
       <div class="campo">
-        <input id="fed" inputmode="decimal" autocomplete="off" spellcheck="false" value="5,00">
-        <span class="pc">%</span>
+        <input id="fed" inputmode="decimal" autocomplete="off" spellcheck="false" value="4,00">
+        <span class="un">%</span>
       </div>
     </div>
   </section>
 
-  <section class="entrada">
-    <div class="entrada-topo">
+  <section class="duplo">
+    <div class="coluna">
+      <span class="moeda-tag">BRL</span>
       <span class="lbl">Valor sob gestão</span>
-      <div class="moedas" role="group" aria-label="Moeda">
-        <button type="button" data-moeda="BRL" aria-pressed="true">BRL</button>
-        <button type="button" data-moeda="USD" aria-pressed="false">USD</button>
+      <div class="entrada-linha">
+        <span class="simbolo">R$</span>
+        <input class="aum" id="aum-brl" inputmode="numeric" autocomplete="off" spellcheck="false"
+               aria-label="Valor sob gestão em reais" value="3.500.000">
+      </div>
+      <div class="faixa">
+        <span class="chip" id="taxa-brl">0,90% a.a.</span>
+        <span id="taxames-brl">mensal 0,0747%</span>
+      </div>
+      <div class="mini">
+        <div class="l"><span>Investimento anual</span><b id="ano-brl">&mdash;</b></div>
+        <div class="l"><span>Investimento mensal</span><b id="mes-brl">&mdash;</b></div>
       </div>
     </div>
-    <div class="entrada-linha">
-      <span class="simbolo" id="simbolo">R$</span>
-      <input id="aum" inputmode="numeric" autocomplete="off" spellcheck="false"
-             aria-label="Valor sob gestão" value="2.000.000">
-    </div>
-    <div class="faixa">
-      <span class="chip" id="taxa">1,00% a.a.</span>
-      <span id="taxa-mes">taxa da sua faixa &middot; cobrada mensalmente a 0,0830%</span>
+
+    <div class="coluna">
+      <span class="moeda-tag">USD</span>
+      <span class="lbl">Valor sob gestão</span>
+      <div class="entrada-linha">
+        <span class="simbolo">US$</span>
+        <input class="aum" id="aum-usd" inputmode="numeric" autocomplete="off" spellcheck="false"
+               aria-label="Valor sob gestão em dólares" value="0">
+      </div>
+      <div class="faixa">
+        <span class="chip" id="taxa-usd">0,75% a.a.</span>
+        <span id="taxames-usd">mensal 0,0623%</span>
+      </div>
+      <div class="mini">
+        <div class="l"><span>Investimento anual</span><b id="ano-usd">&mdash;</b></div>
+        <div class="l"><span>Investimento mensal</span><b id="mes-usd">&mdash;</b></div>
+      </div>
     </div>
   </section>
 
-  <section class="anual">
-    <div class="txt">
-      <strong>Investimento anual na Assessoria</strong>
-      <span id="anual-sub">doze cobranças mensais</span>
-    </div>
-    <div class="big" id="fee-ano">&mdash;</div>
-  </section>
+  <section class="total">
+    <h2 class="secao">Total consolidado</h2>
+    <p class="secao-sub" id="consolidado-sub">as duas carteiras somadas, convertidas a R$ 5,1500</p>
 
-  <section class="mensal">
-    <h2 class="secao">Mês a mês</h2>
+    <div class="anual">
+      <div>
+        <strong>Investimento anual na Assessoria</strong>
+        <span id="anual-sub">doze cobranças mensais</span>
+      </div>
+      <div class="big" id="fee-ano">&mdash;</div>
+    </div>
+
+    <div class="mesames">Mês a mês</div>
 
     <div class="row">
       <div class="rot">Você paga
@@ -290,21 +336,15 @@
     </div>
   </section>
 
-  <section class="ancora">
-    <p>Parado na renda fixa a <b id="rf-taxa">&mdash;</b> ao ano, esse capital renderia cerca de
-      <b id="rf-ano">&mdash;</b>. A assessoria custa <b id="rf-pct">&mdash;</b> desse rendimento
-      &mdash; e <b id="liq-pct">&mdash;</b> é o que de fato fica com a assessoria.</p>
-  </section>
-
   <section class="notas">
-    <p><strong>A taxa é composta, não dividida.</strong> Doze cobranças mensais de
-      <span class="mono" id="nota-mes">0,0830%</span> equivalem exatamente a
-      <span class="mono" id="nota-ano">1,00%</span> ao ano. Por isso o valor anual é um pouco
-      menor que a taxa cheia aplicada de uma vez.</p>
+    <p><strong>A taxa é composta, não dividida.</strong> Doze cobranças mensais equivalem
+      exatamente à taxa anual da faixa. Por isso o valor anual é um pouco menor que a taxa
+      cheia aplicada de uma vez.</p>
+    <p><strong>Cada moeda tem sua própria tabela e sua própria faixa.</strong> A carteira em
+      reais e a em dólares são enquadradas separadamente; o total apenas soma as duas,
+      convertendo o dólar pela cotação informada acima.</p>
     <p><strong>A base é o patrimônio médio do mês</strong>, não o saldo de um dia. A cobrança
       acompanha o valor real da carteira, para cima e para baixo.</p>
-    <p><strong>A taxa livre de risco é editável</strong> e serve só para dimensionar o custo
-      contra o que o capital renderia sem gestão nenhuma. É taxa bruta, antes de imposto de renda.</p>
   </section>
 
   <footer>Simulação &middot; valores sujeitos a confirmação em proposta</footer>
@@ -327,30 +367,28 @@
   };
 
   var IMPOSTO = 0.152;                     // efetivo medido nos pagamentos ao fisco
-  var SIMBOLO = {BRL:"R$", USD:"US$"};
   var LOCALE  = {BRL:"pt-BR", USD:"en-US"};
-  var CHAVE   = "quantum.custo-assessoria.v1";
+  var CHAVE   = "quantum.custo-assessoria.v2";
 
-  var moeda = "BRL";
   var $ = function(id){ return document.getElementById(id); };
 
   function digitos(s){ return String(s).replace(/\D/g,""); }
-  function agrupa(n){ return new Intl.NumberFormat(LOCALE[moeda],{maximumFractionDigits:0}).format(n); }
-  function dinheiro(n){
-    return SIMBOLO[moeda] + " " + new Intl.NumberFormat(LOCALE[moeda],
+  function agrupa(n, m){ return new Intl.NumberFormat(LOCALE[m],{maximumFractionDigits:0}).format(n); }
+  function dinheiro(n, m){
+    return (m==="BRL"?"R$ ":"US$ ") + new Intl.NumberFormat(LOCALE[m],
       {minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
   }
   function pct(x, casas){
     return new Intl.NumberFormat("pt-BR",
       {minimumFractionDigits:casas, maximumFractionDigits:casas}).format(x*100) + "%";
   }
-  // aceita "13,75" e "13.75"; devolve fração (0.1375). Vazio ou inválido -> 0.
-  function taxaLivre(id){
+  // aceita "13,25" e "13.25"; vazio ou inválido -> 0
+  function decimal(id){
     var v = parseFloat(String($(id).value).replace(/\s/g,"").replace(",","."));
-    return (isFinite(v) && v >= 0) ? v/100 : 0;
+    return (isFinite(v) && v >= 0) ? v : 0;
   }
-  function taxaDe(v){
-    var t = TABELA[moeda];
+  function taxaDe(v, m){
+    var t = TABELA[m];
     for (var i=0;i<t.length;i++){ if (v>=t[i][0] && v<t[i][1]) return t[i][2]; }
     return t[t.length-1][2];
   }
@@ -358,95 +396,85 @@
   function guarda(){
     try{
       localStorage.setItem(CHAVE, JSON.stringify({
-        selic:$("selic").value, fed:$("fed").value, moeda:moeda
+        selic:$("selic").value, fed:$("fed").value, cambio:$("cambio").value
       }));
     }catch(e){}
   }
   function recupera(){
     try{
-      var raw = localStorage.getItem(CHAVE);
-      if(!raw) return;
-      var d = JSON.parse(raw) || {};
-      if(d.selic) $("selic").value = d.selic;
-      if(d.fed)   $("fed").value   = d.fed;
-      if(d.moeda === "USD" || d.moeda === "BRL") moeda = d.moeda;
+      var d = JSON.parse(localStorage.getItem(CHAVE) || "{}") || {};
+      if(d.selic)  $("selic").value  = d.selic;
+      if(d.fed)    $("fed").value    = d.fed;
+      if(d.cambio) $("cambio").value = d.cambio;
     }catch(e){}
   }
 
-  function calcula(){
-    var aum    = Number(digitos($("aum").value)) || 0;
-    var anual  = taxaDe(aum);
+  // uma carteira: devolve taxa anual, taxa mensal e os valores na moeda dela
+  function carteira(m){
+    var aum    = Number(digitos($("aum-" + m.toLowerCase()).value)) || 0;
+    var anual  = taxaDe(aum, m);
     var mensal = Math.pow(1+anual, 1/12) - 1;   // duodécimo GEOMÉTRICO
     var feeMes = aum * mensal;
-    var feeAno = feeMes * 12;                    // o que ele paga de fato em doze cobranças
+    return {aum:aum, anual:anual, mensal:mensal, feeMes:feeMes, feeAno:feeMes*12};
+  }
+
+  function calcula(){
+    var cambio = decimal("cambio") || 0;
+    var brl = carteira("BRL"), usd = carteira("USD");
+
+    ["BRL","USD"].forEach(function(m){
+      var c = (m==="BRL") ? brl : usd, s = m.toLowerCase();
+      $("taxa-"+s).textContent    = pct(c.anual,2) + " a.a.";
+      $("taxames-"+s).textContent = "mensal " + pct(c.mensal,4);
+      $("ano-"+s).textContent     = dinheiro(c.feeAno, m);
+      $("mes-"+s).textContent     = dinheiro(c.feeMes, m);
+    });
+
+    // total sempre em BRL
+    var feeMes = brl.feeMes + usd.feeMes * cambio;
+    var feeAno = feeMes * 12;
     var impMes = feeMes * IMPOSTO;
     var liqMes = feeMes - impMes;
 
-    var rfTaxa = moeda === "BRL" ? taxaLivre("selic") : taxaLivre("fed");
-    var rf     = aum * rfTaxa;
+    $("consolidado-sub").textContent =
+      "as duas carteiras somadas, convertidas a R$ " +
+      new Intl.NumberFormat("pt-BR",{minimumFractionDigits:4, maximumFractionDigits:4}).format(cambio);
+    $("anual-sub").textContent = "doze cobranças mensais";
 
-    $("taxa").textContent      = pct(anual,2) + " a.a.";
-    $("taxa-mes").innerHTML    = "taxa da sua faixa &middot; cobrada mensalmente a " + pct(mensal,4);
-    $("nota-mes").textContent  = pct(mensal,4);
-    $("nota-ano").textContent  = pct(anual,2);
-    $("anual-sub").textContent = "doze cobranças mensais de " + pct(mensal,4);
-
-    $("fee-ano").textContent = dinheiro(feeAno);
-    $("fee-mes").textContent = dinheiro(feeMes);
-    $("imp-mes").textContent = dinheiro(impMes);
-    $("liq-mes").textContent = dinheiro(liqMes);
+    $("fee-ano").textContent = dinheiro(feeAno, "BRL");
+    $("fee-mes").textContent = dinheiro(feeMes, "BRL");
+    $("imp-mes").textContent = dinheiro(impMes, "BRL");
+    $("liq-mes").textContent = dinheiro(liqMes, "BRL");
 
     $("bar-liq").style.width = ((1-IMPOSTO)*100) + "%";
     $("bar-imp").style.width = (IMPOSTO*100) + "%";
     $("leg-liq").textContent = pct(1-IMPOSTO,1);
     $("leg-imp").textContent = pct(IMPOSTO,1);
-
-    $("rf-taxa").textContent = pct(rfTaxa,2);
-    $("rf-ano").textContent  = dinheiro(rf);
-    $("rf-pct").textContent  = rf > 0 ? pct(feeAno/rf,1) : "—";
-    $("liq-pct").textContent = rf > 0 ? pct(feeAno*(1-IMPOSTO)/rf,1) : "—";
-
-    $("rf-brl").classList.toggle("ativa", moeda === "BRL");
-    $("rf-usd").classList.toggle("ativa", moeda === "USD");
   }
 
-  function formataCampo(){
-    var d = digitos($("aum").value);
-    $("aum").value = d ? agrupa(Number(d)) : "";
+  function formataAum(id, m){
+    var campo = $(id), d = digitos(campo.value);
+    campo.value = d ? agrupa(Number(d), m) : "";
   }
 
-  $("aum").addEventListener("input", function(){
-    var campo = $("aum");
-    var daDireita = campo.value.length - campo.selectionStart;
-    formataCampo();
-    var pos = Math.max(0, campo.value.length - daDireita);
-    try { campo.setSelectionRange(pos,pos); } catch(e){}
-    calcula();
-  });
-
-  ["selic","fed"].forEach(function(id){
-    $(id).addEventListener("input", function(){ calcula(); guarda(); });
-  });
-
-  Array.prototype.forEach.call(document.querySelectorAll(".moedas button"), function(b){
-    b.addEventListener("click", function(){
-      moeda = b.dataset.moeda;
-      Array.prototype.forEach.call(document.querySelectorAll(".moedas button"), function(o){
-        o.setAttribute("aria-pressed", String(o === b));
-      });
-      $("simbolo").textContent = SIMBOLO[moeda];
-      formataCampo();
+  [["aum-brl","BRL"],["aum-usd","USD"]].forEach(function(p){
+    $(p[0]).addEventListener("input", function(){
+      var campo = $(p[0]);
+      var daDireita = campo.value.length - campo.selectionStart;
+      formataAum(p[0], p[1]);
+      var pos = Math.max(0, campo.value.length - daDireita);
+      try { campo.setSelectionRange(pos,pos); } catch(e){}
       calcula();
-      guarda();
     });
   });
 
-  recupera();
-  Array.prototype.forEach.call(document.querySelectorAll(".moedas button"), function(o){
-    o.setAttribute("aria-pressed", String(o.dataset.moeda === moeda));
+  ["selic","fed","cambio"].forEach(function(id){
+    $(id).addEventListener("input", function(){ calcula(); guarda(); });
   });
-  $("simbolo").textContent = SIMBOLO[moeda];
-  formataCampo();
+
+  recupera();
+  formataAum("aum-brl","BRL");
+  formataAum("aum-usd","USD");
   calcula();
 })();
 </script>
